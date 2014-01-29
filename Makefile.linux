@@ -1,0 +1,45 @@
+
+CROSS_COMPILE	?=
+AS		= $(CROSS_COMPILE)as
+LD		= $(CROSS_COMPILE)ld
+CC		= $(CROSS_COMPILE)gcc
+CPP		= $(CC) -E
+AR		= $(CROSS_COMPILE)ar
+NM		= $(CROSS_COMPILE)nm
+STRIP		= $(CROSS_COMPILE)strip
+OBJCOPY		= $(CROSS_COMPILE)objcopy
+OBJDUMP		= $(CROSS_COMPILE)objdump
+RANLIB		= $(CROSS_COMPILE)ranlib
+
+CFLAGS	= -fPIC -DPIC
+OBJS	= sock.o procom.o
+
+RPMROOT	= $(HOME)/rpm
+
+VERSION	= 2.1.2
+
+DLL_EXT	= so
+SLIB_EXT = a
+
+all:	libnsock.$(DLL_EXT).$(VERSION) libnsock.$(SLIB_EXT)
+
+libnsock.$(DLL_EXT).$(VERSION):	$(OBJS)
+	$(CC) -shared $(OBJS) -o libnsock.$(DLL_EXT).$(VERSION)
+
+libnsock.$(SLIB_EXT):	$(OBJS)
+	rm -f libnsock.$(SLIB_EXT)
+	$(AR) cru libnsock.$(SLIB_EXT) $(OBJS)
+	$(RANLIB) libnsock.$(SLIB_EXT)
+
+sock.o:		sock.c
+procom.o:	procom.c
+
+rpm:
+	mkdir -p socklib-$(VERSION)
+	cp -a Makefile* *.[c,h] LICENSE socklib.spec socklib-$(VERSION)
+	tar jcvf $(RPMROOT)/SOURCES/socklib-$(VERSION).tar.bz2 socklib-$(VERSION)/
+	rm -rf socklib-$(VERSION)
+	rpmbuild -ba socklib.spec
+
+clean:
+	rm -f *.o core libnsock*

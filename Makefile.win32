@@ -1,0 +1,40 @@
+
+CROSS_COMPILE	?= i686-pc-mingw32-
+AS		= $(CROSS_COMPILE)as
+LD		= $(CROSS_COMPILE)ld
+CC		= $(CROSS_COMPILE)gcc
+CPP		= $(CC) -E
+AR		= $(CROSS_COMPILE)ar
+NM		= $(CROSS_COMPILE)nm
+STRIP		= $(CROSS_COMPILE)strip
+OBJCOPY		= $(CROSS_COMPILE)objcopy
+OBJDUMP		= $(CROSS_COMPILE)objdump
+RANLIB		= $(CROSS_COMPILE)ranlib
+
+CFLSGS	= -fPIC -DPIC
+OBJS	= sock.o 
+# procom.o
+
+RPMROOT	= $(HOME)/redhat
+
+VERSION	= 2.1.2-mingw
+
+DLL_EXT	= dll
+SLIB_EXT = a
+
+#all:	libnsock.$(DLL_EXT) libnsock.$(SLIB_EXT)
+all:	libnsockwin32.$(SLIB_EXT)
+
+libnsockwin32.$(DLL_EXT).$(VERSION):	$(OBJS)
+	$(CC) -shared $(OBJS) -o libnsockwin32.$(DLL_EXT).$(VERSION)
+
+libnsockwin32.$(SLIB_EXT):	$(OBJS)
+	rm -f libnsockwin32.$(SLIB_EXT)
+	$(AR) cru libnsockwin32.$(SLIB_EXT) $(OBJS)
+	$(RANLIB) libnsockwin32.$(SLIB_EXT)
+
+sock.o:		sock.c
+# procom.o:	procom.c
+
+clean:
+	rm -f *.o core libnsockwin32.*
